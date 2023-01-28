@@ -20,6 +20,8 @@ std::queue<std::string> makeTokens(const std::string &buffer) {
             case '}':
             case ':':
             case ',':
+            case '[':
+            case ']':
                 tokens.push({buffer[j]});
                 break;
             case '"':
@@ -49,17 +51,59 @@ std::shared_ptr<ObjectType> makeObject(std::queue<std::string> &tokens) {
         auto key = tokens.front();
         tokens.pop(); // key
         tokens.pop(); // :
-        auto value = tokens.front();
-        tokens.pop(); // value
 
-        auto valueType = std::make_shared<ValueType>();
-        valueType->setValue(value);
-        result->set(key, valueType);
+        if (tokens.front() == "[") {
+            tokens.pop();
+            auto array = makeArray(tokens);
+            result->set(key, array);
+        } else if (tokens.front() == "{") {
+            tokens.pop();
+            auto object = makeObject(tokens);
+            result->set(key, object);
+        } else {
+            auto value = tokens.front();
+            tokens.pop(); // value
+            auto valueType = std::make_shared<ValueType>();
+            valueType->setValue(value);
+            result->set(key, valueType);
+        }
 
         if (tokens.front() == "}") {
+            tokens.pop();
             break;
+        } else {
+            tokens.pop();
         }
-        tokens.pop();
+    }
+
+    return result;
+}
+
+std::shared_ptr<ArrayType> makeArray(std::queue<std::string> &tokens) {
+    auto result = std::make_shared<ArrayType>();
+
+    while (true) {
+        if (tokens.front() == "[") {
+            tokens.pop();
+            auto array = makeArray(tokens);
+            result->push(array);
+        } else if (tokens.front() == "{") {
+            tokens.pop();
+            auto object = makeObject(tokens);
+            result->push(object);
+        } else {
+            auto valueData = std::make_shared<ValueType>();
+            valueData->setValue(tokens.front());
+            result->push(valueData);
+            tokens.pop();
+        }
+
+        if (tokens.front() == "]") {
+            tokens.pop();
+            break;
+        } else {
+            tokens.pop();
+        }
     }
 
     return result;

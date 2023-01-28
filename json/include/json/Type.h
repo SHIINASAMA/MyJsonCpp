@@ -44,7 +44,7 @@ private:
 
 class ObjectType : public BasicType {
 public:
-    ObjectType() : BasicType( Type::Object) {
+    ObjectType() : BasicType(Type::Object) {
     }
 
     std::shared_ptr<BasicType> get(const std::string &key) {
@@ -66,6 +66,15 @@ private:
 
 class ArrayType : public BasicType {
 public:
+    ArrayType() : BasicType(Type::Array) {
+    }
+
+    [[nodiscard]] inline size_t size() const noexcept { return list.size(); }
+    [[nodiscard]] inline bool empty() const noexcept { return list.empty(); }
+    void push(const std::shared_ptr<BasicType> &data) noexcept { list.emplace_back(data); }
+    inline std::list<std::shared_ptr<BasicType>>::iterator begin() noexcept { return list.begin(); }
+    inline std::list<std::shared_ptr<BasicType>>::iterator end() noexcept { return list.end(); }
 
 private:
+    std::list<std::shared_ptr<BasicType>> list;
 };
