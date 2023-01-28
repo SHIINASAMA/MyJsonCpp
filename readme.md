@@ -1,4 +1,4 @@
-# MyJsonCpp
+# MyJsonCpp - 教学用途
 
 ## 要求
 
